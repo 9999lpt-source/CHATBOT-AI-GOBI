@@ -67,19 +67,16 @@ async def websocket_endpoint(websocket: WebSocket):
                     # Bắn chữ về màn hình OLED trước
                     await websocket.send_text(f"-> GOBI: {ai_reply}")
                     
-                    # Tiến hành lấy dữ liệu âm thanh PCM từ Edge-TTS
-                    pcm_data = await tts_service.get_tts_bytes(ai_reply)
-                    if pcm_data:
-                        total_length = len(pcm_data)
-                        
-                        for i in range(0, total_length, CHUNK_SIZE):
-                            chunk = pcm_data[i:i + CHUNK_SIZE]
-                            await websocket.send_bytes(chunk)
-                            await asyncio.sleep(0.005)
-                            
-                    else:
-                        await websocket.send_text("-> GOBI: Lỗi giọng nói rồi ông ơi!")
-                        
+                    # =========================================================
+                    # STREAM TRỰC TIẾP PCM XUỐNG ESP32 (KHÔNG CHỜ TẢI HẾT MP3)
+                    # =========================================================
+                    print("🚀 [SERVER]: Đang stream PCM xuống ESP32...")
+                    async for pcm_chunk in tts_service.stream_tts_pcm(ai_reply, chunk_size=CHUNK_SIZE):
+                        await websocket.send_bytes(pcm_chunk)
+                        # Nghỉ 1-2ms nhỏ để tránh quá tải buffer truyền nhận WebSocket trên ESP32
+                        await asyncio.sleep(0.001)
+                    print("✅ [SERVER]: Đã gửi xong luồng âm thanh PCM!")
+
                 else:
                     print("⚠️ [STT]: Không nhận diện được từ nào hoặc âm thanh trống.")
                     await websocket.send_text("-> GOBI: Tui chưa nghe rõ, ông nói lại nha!")
