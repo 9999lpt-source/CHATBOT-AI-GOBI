@@ -7,7 +7,7 @@ class EdgeTTSService:
     def __init__(self):
         pass
 
-    async def stream_tts_pcm(self, text: str, chunk_size: int = 2048):
+    async def get_tts_bytes(self, text: str, chunk_size: int = 2048):
         if not text or not text.strip():
             return
 
