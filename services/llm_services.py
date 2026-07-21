@@ -10,7 +10,7 @@ GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 GLOBAL_HISTORY = [
     {
         "role": "system", 
-        "content": "Bạn là GOBI, trợ lý chatbot AI chạy trên phần cứng ESP32-S3 do LPT chế tạo. Hãy trả lời cực kỳ ngắn gọn, dí dỏm, tối đa 2-3 câu bằng tiếng Việt."
+        "content": "Bạn là Gobi, một người bạn thông minh, hài hước. Bạn nói chuyện cực kỳ tự nhiên. Đừng bao giờ trả lời quá cứng nhắc."
     }
 ]
 MAX_HISTORY_LENGTH = 11  # Giữ lại khoảng 5 cặp hội thoại gần nhất để tránh tràn bộ nhớ
