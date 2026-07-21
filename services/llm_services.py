@@ -27,7 +27,7 @@ def ask_groq_ai(user_text: str) -> str:
     }
     
     payload = {
-        "model": "qwen-3-32b", #llama-3.3-70b-versatile
+        "model": "qwen/qwen3.6-27b", #llama-3.3-70b-versatile
         "messages": GLOBAL_HISTORY  # 🚀 Gửi kèm toàn bộ lịch sử đã tích lũy lên Groq
     }
     
