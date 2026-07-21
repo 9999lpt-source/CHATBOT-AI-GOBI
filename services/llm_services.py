@@ -27,7 +27,7 @@ def ask_groq_ai(user_text: str) -> str:
     }
     
     payload = {
-        "model": "llama-3.3-70b-versatile",
+        "model": "openai/gpt-oss-120b", #llama-3.3-70b-versatile
         "messages": GLOBAL_HISTORY  # 🚀 Gửi kèm toàn bộ lịch sử đã tích lũy lên Groq
     }
     
