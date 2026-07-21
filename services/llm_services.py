@@ -27,7 +27,7 @@ def ask_groq_ai(user_text: str) -> str:
     }
     
     payload = {
-        "model": "meta-llama/llama-4-scout-17b-16e-instruct", #llama-3.3-70b-versatile
+        "model": "llama-3.3-70b-versatile", #llama-3.3-70b-versatile
         "messages": GLOBAL_HISTORY  # 🚀 Gửi kèm toàn bộ lịch sử đã tích lũy lên Groq
     }
     
