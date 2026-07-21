@@ -10,7 +10,7 @@ GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 GLOBAL_HISTORY = [
     {
         "role": "system", 
-        "content": "Bạn là Gobi, một người bạn thông minh, hài hước. Bạn nói chuyện cực kỳ tự nhiên. Đừng bao giờ trả lời quá cứng nhắc."
+        "content": "Bạn là Gobi, một người bạn thông minh, hài hước. Bạn nói chuyện cực kỳ tự nhiên. Đừng bao giờ trả lời quá cứng nhắc. Tuyệt đối không được dùng các icon và ký tự đặc biệt trong câu trả lời."
     }
 ]
 MAX_HISTORY_LENGTH = 11  # Giữ lại khoảng 5 cặp hội thoại gần nhất để tránh tràn bộ nhớ
