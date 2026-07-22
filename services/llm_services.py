@@ -1,4 +1,3 @@
-import re
 import os
 import requests
 
@@ -16,14 +15,6 @@ GLOBAL_HISTORY = [
 ]
 MAX_HISTORY_LENGTH = 11  # Giữ lại khoảng 5 cặp hội thoại gần nhất để tránh tràn bộ nhớ
 
-def clean_reasoning_tags(text: str) -> str:
-    """Xóa bỏ hoàn toàn khối <think>...</think> khỏi câu trả lời của LLM"""
-    if not text:
-        return ""
-    # Xóa toàn bộ khối từ <think> đến </think> (bao gồm xuống dòng)
-    cleaned_text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
-    return cleaned_text.strip()
-
 def ask_groq_ai(user_text: str) -> str:
     global GLOBAL_HISTORY
     
@@ -36,7 +27,7 @@ def ask_groq_ai(user_text: str) -> str:
     }
     
     payload = {
-        "model": "qwen/qwen3.6-27b", #llama-3.3-70b-versatile
+        "model": "openai/gpt-oss-120b", #llama-3.3-70b-versatile
         "messages": GLOBAL_HISTORY  # 🚀 Gửi kèm toàn bộ lịch sử đã tích lũy lên Groq
     }
     
@@ -45,9 +36,7 @@ def ask_groq_ai(user_text: str) -> str:
         response.raise_for_status()
         response_data = response.json()
         
-        ai_reply_temp = response_data["choices"][0]["message"]["content"]
-        
-        ai_reply = clean_reasoning_tags(ai_reply_temp)
+        ai_reply = response_data["choices"][0]["message"]["content"]
         
         # 2. Lưu câu trả lời của AI vào lịch sử để làm vốn cho lần sau
         GLOBAL_HISTORY.append({"role": "assistant", "content": ai_reply})
