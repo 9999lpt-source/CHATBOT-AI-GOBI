@@ -7,7 +7,7 @@ GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 # 🧠 Kho chứa bộ nhớ nằm ẩn hoàn toàn trong service này
 # Vì chạy local, tạm thời định danh mặc định cho thiết bị của ông LPT
-G# 🧠 Kho chứa bộ nhớ với System Prompt tối ưu riêng cho gpt-oss-120b
+# 🧠 Kho chứa bộ nhớ với System Prompt tối ưu riêng cho gpt-oss-120b
 GLOBAL_HISTORY = [
     {
         "role": "system", 
