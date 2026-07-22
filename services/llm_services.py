@@ -1,4 +1,5 @@
 import os
+import re
 import requests
 
 raw_key = os.environ.get("GROQ_API_KEY")
@@ -14,6 +15,19 @@ GLOBAL_HISTORY = [
     }
 ]
 MAX_HISTORY_LENGTH = 11  # Giữ lại khoảng 5 cặp hội thoại gần nhất để tránh tràn bộ nhớ
+
+def clean_text_for_tts(text: str) -> str:
+    # 1. Thay thế dấu chấm cảm, dấu hỏi,... bằng dấu chấm nhẹ hoặc khoảng trắng
+    cleaned = re.sub(r"[!?]", ".", text)
+
+    # 2. Loại bỏ các ký tự đặc biệt khác như *, #, ~, @, $, %, ^, &, _, +, =, <, >, |
+    cleaned = re.sub(r'[^\w\s.,\dÀ-ỹà-ỹ]', '', cleaned)
+
+    # 3. Thu gọn nhiều khoảng trắng hoặc dấu chấm liên tiếp thành 1
+    cleaned = re.sub(r'\.+', '.', cleaned)
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+
+    return cleaned
 
 def ask_groq_ai(user_text: str) -> str:
     global GLOBAL_HISTORY
@@ -36,7 +50,9 @@ def ask_groq_ai(user_text: str) -> str:
         response.raise_for_status()
         response_data = response.json()
         
-        ai_reply = response_data["choices"][0]["message"]["content"]
+        ai_reply_temp = response_data["choices"][0]["message"]["content"]
+        
+        ai_reply = clean_text_for_tts(ai_reply_temp);
         
         # 2. Lưu câu trả lời của AI vào lịch sử để làm vốn cho lần sau
         GLOBAL_HISTORY.append({"role": "assistant", "content": ai_reply})
