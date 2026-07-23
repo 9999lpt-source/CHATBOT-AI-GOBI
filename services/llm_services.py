@@ -91,16 +91,16 @@ def ask_groq_ai(user_text: str) -> str:
         
         ai_reply = response_data["choices"][0]["message"]["content"]
         
-        clean_ai_reply = remove_emojis(ai_reply)
+        # clean_ai_reply = remove_emojis(ai_reply)
         
         # 2. Lưu câu trả lời của AI vào lịch sử để làm vốn cho lần sau
-        GLOBAL_HISTORY.append({"role": "assistant", "content": clean_ai_reply})
+        GLOBAL_HISTORY.append({"role": "assistant", "content": ai_reply})
         
         # 3. Giới hạn độ dài lịch sử (cắt bớt câu cũ nhưng giữ lại System Prompt ở vị trí 0)
         if len(GLOBAL_HISTORY) > MAX_HISTORY_LENGTH:
             GLOBAL_HISTORY = [GLOBAL_HISTORY[0]] + GLOBAL_HISTORY[-(MAX_HISTORY_LENGTH-1):]
             
-        return clean_ai_reply
+        return ai_reply
         
     except Exception as e:
         print(f"[LỖI LLM SERVICE]: {e}")
