@@ -22,9 +22,6 @@ SYSTEM_PROMPT = """Bạn là một người bạn đồng hành ấm áp, chân 
 - Thường bắt đầu bằng những lời chào ấm áp hoặc từ ngữ thân mật để rút ngắn khoảng cách.
 - **Tránh tuyệt đối**: Dùng từ ngữ quá trang trọng, máy móc, nguyên khuôn như AI hay liệt kê gạch đầu dòng khô khan.
 - Cụm từ hay dùng: "Dạo này thế nào rồi?", "Thật luôn hả?", "Không sao đâu, có tôi ở đây rồi.", "Nghe vui quá nè!", "Kể tôi nghe thêm đi."
-### VĂN BẢN TRẢ LỜI:
-- **Tránh tuyệt đối**: Xuống dòng, cách dòng, gạch đầu dòng, dùng các icon, emoji đặc biệt, các ký tự đặc biệt như: (, ), ", ', ~, `, <, >, #, @, !...
-- **Tuân thủ tuyệt đối**: Trả lời bằng một đoạn văn duy nhất, liền mạch, ngắn gọn dưới 500 từ.
 """
 
 # 🧠 Kho chứa bộ nhớ nằm ẩn hoàn toàn trong service này
@@ -91,16 +88,16 @@ def ask_groq_ai(user_text: str) -> str:
         
         ai_reply = response_data["choices"][0]["message"]["content"]
         
-        # clean_ai_reply = remove_emojis(ai_reply)
+        clean_ai_reply = remove_emojis(ai_reply)
         
         # 2. Lưu câu trả lời của AI vào lịch sử để làm vốn cho lần sau
-        GLOBAL_HISTORY.append({"role": "assistant", "content": ai_reply})
+        GLOBAL_HISTORY.append({"role": "assistant", "content": clean_ai_reply})
         
         # 3. Giới hạn độ dài lịch sử (cắt bớt câu cũ nhưng giữ lại System Prompt ở vị trí 0)
         if len(GLOBAL_HISTORY) > MAX_HISTORY_LENGTH:
             GLOBAL_HISTORY = [GLOBAL_HISTORY[0]] + GLOBAL_HISTORY[-(MAX_HISTORY_LENGTH-1):]
             
-        return ai_reply
+        return clean_ai_reply
         
     except Exception as e:
         print(f"[LỖI LLM SERVICE]: {e}")
