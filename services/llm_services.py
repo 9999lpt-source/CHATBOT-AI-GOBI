@@ -42,8 +42,11 @@ def remove_emojis(text: str) -> str:
     """
     if not text:
         return ""
+    
+    clean = re.sub(r'[\*\_\#\`\~]', '', text)
+    
+    clean = re.sub(r'["“”‘’\'\(\)\[\]\{\}]', '', clean)
 
-    # Pattern Regex bao phủ hầu hết các dải Unicode của Emoji và Icon
     emoji_pattern = re.compile(
         "["
         "\U00010000-\U0010FFFF"  # Các emoji chuẩn Unicode (bao gồm 🌟, 🎤, 🚀,...)
@@ -56,11 +59,11 @@ def remove_emojis(text: str) -> str:
         flags=re.UNICODE
     )
     
-    # Thay thế các icon bằng chuỗi rỗng
-    clean_text = emoji_pattern.sub('', text)
+    clean = emoji_pattern.sub('', clean)
     
-    # Dọn dẹp khoảng trắng thừa nếu icon đứng một mình
-    return clean_text.strip()
+    clean = re.sub(r'\s+', ' ', clean)
+    
+    return clean.strip()
 
 def ask_groq_ai(user_text: str) -> str:
     global GLOBAL_HISTORY
