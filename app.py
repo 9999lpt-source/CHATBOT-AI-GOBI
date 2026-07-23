@@ -64,24 +64,17 @@ async def websocket_endpoint(websocket: WebSocket):
                     ai_reply = await loop.run_in_executor(None, ask_groq_ai, user_text)
                     print(f"[GOBI]: {ai_reply}")
                     
-                    paragraphs = [p.strip() for p in ai_reply.split("\n") if p.strip()]
-                    
-                    print("🚀 [SERVER]: Đang stream PCM xuống ESP32...")
-                    
-                    # 3. Lặp qua từng đoạn để stream TTS + Cập nhật OLED
-                    for idx, paragraph in enumerate(paragraphs):
-                        print(f"🎙️ [TTS Chunk {idx+1}/{len(paragraphs)}]: {paragraph}")
-                    
-                        # Bắn chữ về màn hình OLED trước
-                        await websocket.send_text(f"-> GOBI: {ai_reply}")
+                    # Bắn chữ về màn hình OLED trước
+                    await websocket.send_text(f"-> GOBI: {ai_reply}")
                     
                     # =========================================================
                     # STREAM TRỰC TIẾP PCM XUỐNG ESP32 (KHÔNG CHỜ TẢI HẾT MP3)
                     # =========================================================
-                        async for pcm_chunk in tts_service.stream_tts_pcm(paragraph, chunk_size=CHUNK_SIZE):
-                            await websocket.send_bytes(pcm_chunk)
-                            await asyncio.sleep(0.001)
-                            
+                    print("🚀 [SERVER]: Đang stream PCM xuống ESP32...")
+                    async for pcm_chunk in tts_service.stream_tts_pcm(ai_reply, chunk_size=CHUNK_SIZE):
+                        await websocket.send_bytes(pcm_chunk)
+                        # Nghỉ 1-2ms nhỏ để tránh quá tải buffer truyền nhận WebSocket trên ESP32
+                        await asyncio.sleep(0.001)
                     print("✅ [SERVER]: Đã gửi xong luồng âm thanh PCM!")
 
                 else:
