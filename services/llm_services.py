@@ -1,5 +1,6 @@
 import os
 import requests
+import re
 
 raw_key = os.environ.get("GROQ_API_KEY")
 GROQ_API_KEY = f"Bearer {raw_key}" if raw_key else None
@@ -33,6 +34,34 @@ GLOBAL_HISTORY = [
 ]
 MAX_HISTORY_LENGTH = 11  # Giữ lại khoảng 5 cặp hội thoại gần nhất để tránh tràn bộ nhớ
 
+import re
+
+def remove_emojis(text: str) -> str:
+    """
+    Hàm loại bỏ tất cả các emoji, icon Unicode ra khỏi chuỗi văn bản.
+    """
+    if not text:
+        return ""
+
+    # Pattern Regex bao phủ hầu hết các dải Unicode của Emoji và Icon
+    emoji_pattern = re.compile(
+        "["
+        "\U00010000-\U0010FFFF"  # Các emoji chuẩn Unicode (bao gồm 🌟, 🎤, 🚀,...)
+        "\u2600-\u26FF"          # Các biểu tượng Miscellaneous Symbols (☀️, ☔, ☕,...)
+        "\u2700-\u27BF"          # Các biểu tượng Dingbats (✂️, ✈️, ✉️,...)
+        "\u2300-\u23FF"          # Các biểu tượng kĩ thuật (⏰, ⏱️,...)
+        "\u2B50"                 # Ký tự ngôi sao ⭐
+        "\u200D"                 # Ký tự nối Zero Width Joiner trong emoji nhóm
+        "]+", 
+        flags=re.UNICODE
+    )
+    
+    # Thay thế các icon bằng chuỗi rỗng
+    clean_text = emoji_pattern.sub('', text)
+    
+    # Dọn dẹp khoảng trắng thừa nếu icon đứng một mình
+    return clean_text.strip()
+
 def ask_groq_ai(user_text: str) -> str:
     global GLOBAL_HISTORY
     
@@ -56,14 +85,16 @@ def ask_groq_ai(user_text: str) -> str:
         
         ai_reply = response_data["choices"][0]["message"]["content"]
         
+        clean_ai_reply = remove_emojis(ai_reply)
+        
         # 2. Lưu câu trả lời của AI vào lịch sử để làm vốn cho lần sau
-        GLOBAL_HISTORY.append({"role": "assistant", "content": ai_reply})
+        GLOBAL_HISTORY.append({"role": "assistant", "content": clean_ai_reply})
         
         # 3. Giới hạn độ dài lịch sử (cắt bớt câu cũ nhưng giữ lại System Prompt ở vị trí 0)
         if len(GLOBAL_HISTORY) > MAX_HISTORY_LENGTH:
             GLOBAL_HISTORY = [GLOBAL_HISTORY[0]] + GLOBAL_HISTORY[-(MAX_HISTORY_LENGTH-1):]
             
-        return ai_reply
+        return clean_ai_reply
         
     except Exception as e:
         print(f"[LỖI LLM SERVICE]: {e}")
