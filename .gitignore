@@ -1,0 +1,13 @@
+# Chặn file chứa API Key / cấu hình bí mật
+.env
+*.env
+
+# Chặn thư mục rác Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+
+# Chặn file cấu hình riêng của VS Code
+.vscode/
