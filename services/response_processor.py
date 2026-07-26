@@ -16,15 +16,17 @@ class ResponseProcessor:
             return {"commands": [], "speech_text": ""}
 
         commands = []
-        clean_text = raw_llm_text
-
-        # Ví dụ bóc tách các thẻ lệnh dạng [CMD: LED_ON] hoặc [CMD: SERVO_90]
-        cmd_matches = re.findall(r'\[CMD:\s*([^\]]+)\]', raw_llm_text)
+        
+        # 1. Bóc tách tất cả các lệnh nằm trong ngoặc vuông [...]
+        cmd_matches = re.findall(r'\[(.*?)\]', raw_llm_text)
         if cmd_matches:
             for cmd in cmd_matches:
-                commands.append(cmd.strip())
-            # Loại bỏ thẻ lệnh khỏi câu thoại để TTS không đọc ra từ [CMD: ...]
-            clean_text = re.sub(r'\[CMD:\s*[^\]]+\]', '', clean_text).strip()
+                if cmd.strip():
+                    commands.append(cmd.strip())
+
+        # 2. Xóa TOÀN BỘ các thẻ trong ngoặc vuông [...] khỏi câu thoại (bao gồm cả khoảng trắng thừa đằng sau)
+        clean_text = re.sub(r'\[.*?\]\s*', '', raw_llm_text).strip()
+
         return {
             "commands": commands,
             "speech_text": clean_text

@@ -96,6 +96,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
             # Bóc tách câu trả lời
             processed_data = response_processor.process(raw_ai_reply)
+            print(raw_ai_reply, flush=True)
             commands = processed_data["commands"]
             speech_text = processed_data["speech_text"]
 
@@ -154,6 +155,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
             if "text" in message and message["text"]:
                 text_data = message["text"].strip()
+                print(message, flush=True)
                 
                 sig_type = text_data
                 try:
