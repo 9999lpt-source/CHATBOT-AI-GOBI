@@ -158,13 +158,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 print(message, flush=True)
                 
                 sig_type = text_data
-                try:
-                    parsed_json = json.loads(text_data)
-                    sig_type = parsed_json.get("signal", text_data)
-                except json.JSONDecodeError:
-                    pass
 
-                # --- 1. CHẠM NÚT: BẮT ĐẦU CHU TRÌNH MỚI --- 
+                # --- 1. CHẠM NÚT: BẮT ĐẦU CHU TRÌNH MỚI ---
                 if sig_type == "start_sig":
                     print("\n📩 [SIGNAL]: Nhận 'start_sig' -> Bắt đầu thu âm!", flush=True)
                     await cancel_current_pipeline()
