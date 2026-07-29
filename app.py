@@ -164,7 +164,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 except json.JSONDecodeError:
                     pass
 
-                # --- 1. CHẠM NÚT: BẮT ĐẦU CHU TRÌNH MỚI ---
+                # --- 1. CHẠM NÚT: BẮT ĐẦU CHU TRÌNH MỚI --- 
                 if sig_type == "start_sig":
                     print("\n📩 [SIGNAL]: Nhận 'start_sig' -> Bắt đầu thu âm!", flush=True)
                     await cancel_current_pipeline()
