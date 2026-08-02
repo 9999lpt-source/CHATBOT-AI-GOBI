@@ -65,7 +65,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 "\n🎤 [RECORDING]: Bắt đầu nhận âm thanh từ ESP32...",
                 flush=True,
             )
-            await send_signal("status", {"message": "GOBI đang nghe..."})
+            await send_signal("status", {"message": "Minny đang nghe..."})
 
             audio_frames = []
 
@@ -92,7 +92,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 flush=True,
             )
             await send_signal(
-                "status", {"message": "GOBI đang dịch giọng nói..."}
+                "status", {"message": "Minny đã nghe!"}
             )
 
             user_text = await stt_service.transcribe_audio(audio_frames)
@@ -109,7 +109,7 @@ async def websocket_endpoint(websocket: WebSocket):
             print(f'\n[LPT (Giọng nói)]: "{user_text}"', flush=True)
 
             # Chuyển sang LLM
-            await send_signal("status", {"message": "GOBI đang suy nghĩ..."})
+            await send_signal("status", {"message": "Đang suy nghĩ..."})
             loop = asyncio.get_running_loop()
             raw_ai_reply = await loop.run_in_executor(
                 None, llm_service.ask, user_text
@@ -130,7 +130,7 @@ async def websocket_endpoint(websocket: WebSocket):
             # Stream TTS (Đã được chỉnh sửa xử lý câu an toàn)
             if speech_text:
                 await send_signal(
-                    "status", {"message": f"GOBI: {speech_text}"}
+                    "status", {"message": f"Minny: {speech_text}"}
                 )
                 print(
                     "🚀 [SERVER]: Đang stream PCM xuống ESP32...", flush=True
