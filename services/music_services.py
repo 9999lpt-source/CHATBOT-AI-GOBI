@@ -19,18 +19,6 @@ class MusicStreamService:
             'quiet': True,
             'default_search': 'ytsearch1:',
             'noplaylist': True,
-            'nocheckcertificate': True,
-            'ignoreerrors': True,
-            'no_warnings': True,
-            'extractor_args': {
-                'youtube': {
-                    'player_client': ['android', 'web'],
-                    'skip': ['hls', 'dash']
-                }
-            },
-            'http_headers': {
-                'User-Agent': 'com.google.android.youtube/19.29.37 (Linux; U; Android 11; gts6lvw) gzip',
-            }
         }
 
         # Chạy yt-dlp trong executor để tránh block event loop của asyncio
