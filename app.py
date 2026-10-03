@@ -122,9 +122,10 @@ async def websocket_endpoint(websocket: WebSocket):
             print(raw_ai_reply, flush=True)
             commands = processed_data["commands"]
             speech_text = processed_data["speech_text"]
+            print(commands, flush=True)
 
             # --- XỬ LÝ PHÁT NHẠC NẾU CÓ COMMAND 'MUSIC' ---
-            if commands == "MUSIC":
+            if any(cmd.upper() == "MUSIC" for cmd in commands):
                 # Dùng speech_text hoặc user_text làm từ khóa tìm kiếm bài hát
                 search_query = speech_text if speech_text else user_text
                 
