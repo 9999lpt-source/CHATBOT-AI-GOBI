@@ -16,7 +16,7 @@ class MusicStreamService:
 
         ydl_opts = {
             # Chọn audio tốt nhất, nếu không có thì lấy video/audio bất kỳ rồi giải mã âm thanh
-            'format': 'bestaudio/best/ba/b',
+            'format': 'bestaudio/best',
             'quiet': True,
             'default_search': 'ytsearch1:',
             'noplaylist': True,
