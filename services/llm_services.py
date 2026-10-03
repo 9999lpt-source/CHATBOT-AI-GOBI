@@ -81,7 +81,7 @@ class GroqLLMService:
         
         payload = {
             "model": self.model,
-            "tools": [{ type: "browser_search" }],
+            "tools": [{ "type": "browser_search" }],
             "messages": self.history
         }
         
