@@ -15,15 +15,13 @@ class MusicStreamService:
         print(f"🔍 Đang tìm kiếm: '{search_query}'...")
 
         ydl_opts = {
-            'format': 'bestaudio/best/ba/b',
+            'format': 'bestaudio/best',
             'quiet': True,
             'default_search': 'ytsearch1:',
             'noplaylist': True,
             'nocheckcertificate': True,
             'ignoreerrors': True,
             'no_warnings': True,
-            
-            # --- CẤU HÌNH BẮT BUỘC ĐỂ KHÔNG BỊ CHẶN BOT TRÊN RENDER ---
             'extractor_args': {
                 'youtube': {
                     'player_client': ['android', 'web'],
