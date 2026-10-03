@@ -124,7 +124,7 @@ async def websocket_endpoint(websocket: WebSocket):
             speech_text = processed_data["speech_text"]
 
             # --- XỬ LÝ PHÁT NHẠC NẾU CÓ COMMAND 'MUSIC' ---
-            if commands and commands.upper() == "MUSIC":
+            if commands == "MUSIC":
                 # Dùng speech_text hoặc user_text làm từ khóa tìm kiếm bài hát
                 search_query = speech_text if speech_text else user_text
                 
