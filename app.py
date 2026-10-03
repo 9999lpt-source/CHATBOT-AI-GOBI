@@ -124,12 +124,13 @@ async def websocket_endpoint(websocket: WebSocket):
             speech_text = processed_data["speech_text"]
 
             if commands:
+                # if commands == "MUSIC" or commands == "music":
                 print(f"⚙️ [COMMANDS]: {commands}", flush=True)
                 await send_signal("command", {"actions": commands})
 
             print(f"[GOBI]: {speech_text}", flush=True)
 
-            # Stream TTS (Đã được chỉnh sửa xử lý câu an toàn)
+            # Stream TTS xuống ESP32
             if speech_text:
                 await send_signal(
                     "status", {"message": f"Minny: {speech_text}"}
@@ -138,30 +139,20 @@ async def websocket_endpoint(websocket: WebSocket):
                     "🚀 [SERVER]: Đang stream PCM xuống ESP32...", flush=True
                 )
 
-                # Tách văn bản thành các câu dựa trên dấu chấm, cảm, hỏi, xuống dòng
-                raw_sentences = re.split(r"[.?!;\n]+", speech_text)
-
-                # Lọc lấy các câu thực sự có từ ngữ, bỏ qua khoảng trắng hoặc dấu câu lẻ
-                chunks_to_speak = [
-                    s.strip()
-                    for s in raw_sentences
-                    if s.strip() and re.search(r"\w+", s)
-                ]
-
                 total_bytes_sent = 0
-                for sentence in chunks_to_speak:
-                    try:
-                        async for pcm_chunk in tts_service.stream_tts_pcm(
-                            sentence, chunk_size=CHUNK_SIZE
-                        ):
-                            await asyncio.sleep(0)
-                            await websocket.send_bytes(pcm_chunk)
-                            total_bytes_sent += len(pcm_chunk)
-                    except Exception as tts_err:
-                        print(
-                            f'❌ [TTS ERROR]: Lỗi đọc câu "{sentence[:20]}...": {tts_err}',
-                            flush=True,
-                        )
+                try:
+                    # Gọi trực tiếp TTS service, việc tách câu đã được xử lý bên trong tts_service
+                    async for pcm_chunk in tts_service.stream_tts_pcm(
+                        speech_text, chunk_size=CHUNK_SIZE
+                    ):
+                        await asyncio.sleep(0)
+                        await websocket.send_bytes(pcm_chunk)
+                        total_bytes_sent += len(pcm_chunk)
+                except Exception as tts_err:
+                    print(
+                        f"❌ [TTS ERROR]: Lỗi stream âm thanh: {tts_err}",
+                        flush=True,
+                    )
 
                 print(
                     f"✅ [SERVER]: Hoàn tất gửi luồng âm thanh PCM! (Tổng: {total_bytes_sent} bytes)",
@@ -212,7 +203,7 @@ async def websocket_endpoint(websocket: WebSocket):
                         "\n📩 [SIGNAL]: Nhận 'stop_rec_sig' -> Buông tay, chốt file audio!",
                         flush=True,
                     )
-                    recording_event.clear()  # Chỉ tắt cờ thu âm, KHÔNG hủy task!
+                    recording_event.clear()  # Chỉ tắt cờ thu âm
 
                 # --- 3. TÍN HIỆU HỦY KHẨN CẤP (NẾU CÓ) ---
                 elif sig_type == "cancel_sig":
