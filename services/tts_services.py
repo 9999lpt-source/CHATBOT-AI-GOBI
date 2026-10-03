@@ -24,7 +24,7 @@ class EdgeTTSService:
         
         for sentence in chunks_to_speak:
             try:
-                communicate = edge_tts.Communicate(text, VOICE)
+                communicate = edge_tts.Communicate(sentence, VOICE)
                 codec = av.CodecContext.create('mp3', 'r')
             
                 # Khởi tạo bộ Chuyển đổi Sample Rate về đúng 16000Hz, Mono, 16-bit
