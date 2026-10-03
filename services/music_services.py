@@ -15,18 +15,21 @@ class MusicStreamService:
         print(f"🔍 Đang tìm kiếm: '{search_query}'...")
 
         ydl_opts = {
-            # Chọn audio tốt nhất, nếu không có thì lấy video/audio bất kỳ rồi giải mã âm thanh
-            'format': 'bestaudio/best',
+            'format': 'bestaudio/best/ba/b',
             'quiet': True,
             'default_search': 'ytsearch1:',
             'noplaylist': True,
-            'cookiefile': 'cookies.txt',
             'nocheckcertificate': True,
             'ignoreerrors': True,
             'no_warnings': True,
-            'source_address': '0.0.0.0',
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android', 'web'],
+                    'skip': ['hls', 'dash']
+                }
+            },
             'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'User-Agent': 'com.google.android.youtube/19.29.37 (Linux; U; Android 11; gts6lvw) gzip',
             }
         }
 
