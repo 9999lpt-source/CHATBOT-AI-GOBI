@@ -15,7 +15,8 @@ class MusicStreamService:
         print(f"🔍 Đang tìm kiếm: '{search_query}'...")
 
         ydl_opts = {
-            'format': 'bestaudio/best',
+            # Chọn audio tốt nhất, nếu không có thì lấy video/audio bất kỳ rồi giải mã âm thanh
+            'format': 'bestaudio/best/ba/b',
             'quiet': True,
             'default_search': 'ytsearch1:',
             'noplaylist': True,
@@ -26,33 +27,42 @@ class MusicStreamService:
             'source_address': '0.0.0.0',
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-us,en;q=0.5',
             }
         }
 
-        # Chạy yt-dlp trong executor để tránh block event loop của asyncio
         loop = asyncio.get_running_loop()
         def extract():
             with YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(search_query, download=False)
+                if not info:
+                    return None, None
+                
+                # Nếu là danh sách kết quả tìm kiếm (ytsearch1:)
                 if 'entries' in info and info['entries']:
                     info = info['entries'][0]
+                
+                if not info:
+                    return None, None
+
                 return info.get('url'), info.get('title', 'Unknown')
 
         audio_url, title = await loop.run_in_executor(None, extract)
+        
+        # Bắt chặt trường hợp không lấy được URL stream
         if not audio_url:
-            print("❌ Không tìm thấy stream audio!")
+            print("❌ Không tìm thấy stream audio hoặc video không hỗ trợ!")
             return
 
         print(f"🎵 Đang phát: {title}")
 
         try:
-            # Mở stream HTTP trực tiếp bằng PyAV container
             container = av.open(audio_url)
-            audio_stream = next(s for s in container.streams if s.type == 'audio')
+            audio_stream = next((s for s in container.streams if s.type == 'audio'), None)
 
-            # Bộ chuyển đổi sample rate / channel / format
+            if not audio_stream:
+                print("❌ Không tìm thấy luồng audio trong stream!")
+                return
+
             resampler = av.AudioResampler(
                 format=self.format_pcm,
                 layout=self.layout,
@@ -61,21 +71,17 @@ class MusicStreamService:
 
             pcm_buffer = bytearray()
 
-            # Demux & decode từng packet từ stream YouTube
             for packet in container.demux(audio_stream):
                 for frame in packet.decode():
-                    # Resample frame về đúng chuẩn mong muốn (16000Hz, Mono, s16)
                     resampled_frames = resampler.resample(frame)
                     for r_frame in resampled_frames:
                         raw_pcm = r_frame.to_ndarray().tobytes()
                         pcm_buffer.extend(raw_pcm)
 
-                        # Yield từng chunk cố định dung lượng
                         while len(pcm_buffer) >= chunk_size:
                             yield bytes(pcm_buffer[:chunk_size])
                             del pcm_buffer[:chunk_size]
 
-            # Xử lý phần dư còn lại trong buffer
             if len(pcm_buffer) > 0:
                 yield bytes(pcm_buffer)
 
