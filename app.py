@@ -11,6 +11,7 @@ from services.llm_services import GroqLLMService
 from services.response_processor import ResponseProcessor
 from services.stt_services import GroqSTTService
 from services.tts_services import EdgeTTSService
+from services.music_services import MusicStreamService
 
 app = FastAPI()
 
@@ -18,6 +19,7 @@ app = FastAPI()
 stt_service = GroqSTTService()
 llm_service = GroqLLMService()
 tts_service = EdgeTTSService()
+music_service = MusicStreamService()
 response_processor = ResponseProcessor()
 
 CHUNK_SIZE = 2048
