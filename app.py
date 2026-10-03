@@ -123,15 +123,30 @@ async def websocket_endpoint(websocket: WebSocket):
             commands = processed_data["commands"]
             speech_text = processed_data["speech_text"]
 
-            if commands:
-                # if commands == "MUSIC" or commands == "music":
-                print(f"⚙️ [COMMANDS]: {commands}", flush=True)
-                await send_signal("command", {"actions": commands})
+            # --- XỬ LÝ PHÁT NHẠC NẾU CÓ COMMAND 'MUSIC' ---
+            if commands and commands.upper() == "MUSIC":
+                # Dùng speech_text hoặc user_text làm từ khóa tìm kiếm bài hát
+                search_query = speech_text if speech_text else user_text
+                
+                await send_signal("status", {"message": f"Minny đang tìm nhạc: {search_query}"})
+                print(f"🎵 [MUSIC]: Bắt đầu tìm kiếm và stream nhạc cho từ khóa: '{search_query}'...", flush=True)
 
-            print(f"[GOBI]: {speech_text}", flush=True)
+                total_bytes_sent = 0
+                try:
+                    # Gọi hàm stream_audio_pcm từ music_service
+                    async for pcm_chunk in music_service.stream_audio_pcm(
+                        search_query=search_query, chunk_size=CHUNK_SIZE
+                    ):
+                        await asyncio.sleep(0)  # Tránh block event loop
+                        await websocket.send_bytes(pcm_chunk)
+                        total_bytes_sent += len(pcm_chunk)
 
-            # Stream TTS xuống ESP32
-            if speech_text:
+                    print(f"✅ [SERVER]: Hoàn tất stream nhạc! (Tổng: {total_bytes_sent} bytes)", flush=True)
+                except Exception as music_err:
+                    print(f"❌ [MUSIC ERROR]: Lỗi stream nhạc: {music_err}", flush=True)
+
+            # --- NẾU KHÔNG PHẢI LỆNH PHÁT NHẠC THÌ STREAM TTS BÌNH THƯỜNG ---
+            elif speech_text:
                 await send_signal(
                     "status", {"message": f"Minny: {speech_text}"}
                 )
@@ -141,7 +156,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 total_bytes_sent = 0
                 try:
-                    # Gọi trực tiếp TTS service, việc tách câu đã được xử lý bên trong tts_service
+                    # tts_service đã tự động tách câu
                     async for pcm_chunk in tts_service.stream_tts_pcm(
                         speech_text, chunk_size=CHUNK_SIZE
                     ):
