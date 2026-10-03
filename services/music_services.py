@@ -1,6 +1,4 @@
 import asyncio
-import numpy as np
-import sounddevice as sd
 import av
 from yt_dlp import YoutubeDL
 
