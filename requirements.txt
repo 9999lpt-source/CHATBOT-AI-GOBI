@@ -7,4 +7,4 @@ av==18.0.0
 numpy==1.26.4
 miniaudio==1.71
 python-dotenv
-yt_dlp==2026.8.19
+yt_dlp
