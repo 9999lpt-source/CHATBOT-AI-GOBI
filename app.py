@@ -165,10 +165,7 @@ async def websocket_endpoint(websocket: WebSocket):
                         await websocket.send_bytes(pcm_chunk)
                         total_bytes_sent += len(pcm_chunk)
                 except Exception as tts_err:
-                    print(
-                        f"❌ [TTS ERROR]: Lỗi stream âm thanh: {tts_err}",
-                        flush=True,
-                    )
+                    print(f"❌ [TTS ERROR]: Lỗi stream âm thanh: {tts_err}",flush=True)
 
                 print(
                     f"✅ [SERVER]: Hoàn tất gửi luồng âm thanh PCM! (Tổng: {total_bytes_sent} bytes)",

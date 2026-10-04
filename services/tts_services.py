@@ -51,7 +51,21 @@ class EdgeTTSService:
                                     while len(pcm_buffer) >= chunk_size:
                                         yield bytes(pcm_buffer[:chunk_size])
                                         del pcm_buffer[:chunk_size]
+                                        
+                # Flush hết các packet còn đọng trong codec sau khi stream xong 1 câu
+                packets = codec.parse()
+                for packet in packets:
+                    frames = codec.decode(packet)
+                    for frame in frames:
+                        resampled_frames = resampler.resample(frame)
+                        for r_frame in resampled_frames:
+                            pcm_buffer.extend(r_frame.to_ndarray().tobytes())
 
+                # Yield phần dữ liệu PCM còn dư trong buffer
+                while len(pcm_buffer) >= chunk_size:
+                    yield bytes(pcm_buffer[:chunk_size])
+                    del pcm_buffer[:chunk_size]
+                
                 if len(pcm_buffer) > 0:
                     yield bytes(pcm_buffer)
 
