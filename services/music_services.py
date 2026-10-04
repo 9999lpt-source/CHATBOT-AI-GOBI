@@ -17,13 +17,8 @@ class MusicStreamService:
         ydl_opts = {
             'format': 'bestaudio/best',
             'quiet': True,
-            'default_search': 'ytsearch1:',
+            'default_search': 'scsearch1:',
             'noplaylist': True,
-            'extractor_args': {
-                'youtube': {
-                    'player_client': ['android', 'ios']
-                }
-            }
         }
 
         # Chạy yt-dlp trong executor để tránh block event loop của asyncio
