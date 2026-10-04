@@ -19,6 +19,11 @@ class MusicStreamService:
             'quiet': True,
             'default_search': 'ytsearch1:',
             'noplaylist': True,
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android', 'ios']
+                }
+            }
         }
 
         # Chạy yt-dlp trong executor để tránh block event loop của asyncio
