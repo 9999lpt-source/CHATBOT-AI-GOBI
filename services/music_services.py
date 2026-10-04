@@ -1,5 +1,6 @@
 import asyncio
 import av
+import time
 from yt_dlp import YoutubeDL
 
 class MusicStreamService:
@@ -21,7 +22,6 @@ class MusicStreamService:
             'noplaylist': True,
         }
 
-        # Chạy yt-dlp trong executor để tránh block event loop của asyncio
         loop = asyncio.get_running_loop()
         def extract():
             with YoutubeDL(ydl_opts) as ydl:
@@ -37,12 +37,14 @@ class MusicStreamService:
 
         print(f"🎵 Đang phát: {title}")
 
+        # Tính toán thời gian thực của 1 chunk (2048 bytes / (16000 * 2) = 0.064s)
+        # Giảm nhẹ xuống 0.055s để server luôn chạy nhanh hơn loa một tí, tránh cạn buffer ESP32
+        chunk_duration = (chunk_size / (self.sample_rate * 2)) * 0.85 
+
         try:
-            # Mở stream HTTP trực tiếp bằng PyAV container
             container = av.open(audio_url)
             audio_stream = next(s for s in container.streams if s.type == 'audio')
 
-            # Bộ chuyển đổi sample rate / channel / format
             resampler = av.AudioResampler(
                 format=self.format_pcm,
                 layout=self.layout,
@@ -51,21 +53,33 @@ class MusicStreamService:
 
             pcm_buffer = bytearray()
 
-            # Demux & decode từng packet từ stream YouTube
             for packet in container.demux(audio_stream):
                 for frame in packet.decode():
-                    # Resample frame về đúng chuẩn mong muốn (16000Hz, Mono, s16)
                     resampled_frames = resampler.resample(frame)
                     for r_frame in resampled_frames:
                         raw_pcm = r_frame.to_ndarray().tobytes()
                         pcm_buffer.extend(raw_pcm)
 
-                        # Yield từng chunk cố định dung lượng
                         while len(pcm_buffer) >= chunk_size:
-                            yield bytes(pcm_buffer[:chunk_size])
+                            chunk = bytes(pcm_buffer[:chunk_size])
                             del pcm_buffer[:chunk_size]
+                            
+                            yield chunk
+                            
+                            # CỰC KỲ QUAN TRỌNG: Nhường Event Loop + Điều tiết tốc độ
+                            await asyncio.sleep(chunk_duration)
 
-            # Xử lý phần dư còn lại trong buffer
+            # Flush bộ đệm resampler còn sót lại
+            rest_frames = resampler.resample(None)
+            if rest_frames:
+                for r_frame in rest_frames:
+                    pcm_buffer.extend(r_frame.to_ndarray().tobytes())
+
+            while len(pcm_buffer) >= chunk_size:
+                yield bytes(pcm_buffer[:chunk_size])
+                del pcm_buffer[:chunk_size]
+                await asyncio.sleep(chunk_duration)
+
             if len(pcm_buffer) > 0:
                 yield bytes(pcm_buffer)
 
