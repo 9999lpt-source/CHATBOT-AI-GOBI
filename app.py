@@ -22,7 +22,8 @@ tts_service = EdgeTTSService()
 music_service = MusicStreamService()
 response_processor = ResponseProcessor()
 
-CHUNK_SIZE = 1024
+CHUNK_SIZE = 2048
+
 
 @app.get("/")
 def read_root():
