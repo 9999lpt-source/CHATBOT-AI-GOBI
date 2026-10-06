@@ -134,10 +134,16 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 total_bytes_sent = 0
                 try:
+                    first_chunk = True
                     # Gọi hàm stream_audio_pcm từ music_service
                     async for pcm_chunk in music_service.stream_audio_pcm(
                         search_query=search_query, chunk_size=CHUNK_SIZE
                     ):
+                        if first_chunk:
+                            first_chunk = False
+                            title_to_send = getattr(music_service, 'title_music', search_query)
+                            await send_signal("status", {"message": f"Đang phát: {title_to_send}"})
+                            
                         await asyncio.sleep(0)  # Tránh block event loop
                         await websocket.send_bytes(pcm_chunk)
                         total_bytes_sent += len(pcm_chunk)

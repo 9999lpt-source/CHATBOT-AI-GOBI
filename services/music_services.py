@@ -8,6 +8,7 @@ class MusicStreamService:
         self.sample_rate = sample_rate
         self.layout = layout
         self.format_pcm = format_pcm
+        self.title_music = ""
 
     async def stream_audio_pcm(self, search_query: str, chunk_size: int = 2048):
         """
@@ -35,6 +36,7 @@ class MusicStreamService:
             print("❌ Không tìm thấy stream audio!")
             return
 
+        self.title_music = title
         print(f"🎵 Đang phát: {title}")
 
         # Tính toán thời gian thực của 1 chunk (2048 bytes / (16000 * 2) = 0.064s)
